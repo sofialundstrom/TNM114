@@ -14,3 +14,9 @@ export type Target = {
   x: number;
   y: number;
 };
+
+export type Agent = {
+  id: number;
+  x: number;
+  y: number;
+};
