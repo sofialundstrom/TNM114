@@ -1,17 +1,23 @@
-import type { Cell, Target } from "../types/types";
+import type { Cell, Target, Agent as AgentType } from "../types/types";
+import Agent from "./Agent";
 
 type MapProps = {
   cells: Cell[];
   target: Target;
+  agents: AgentType[];
 };
 
-function Map({ cells, target }: MapProps) {
+function Map({ cells, target, agents }: MapProps) {
   return (
     <div className="map">
       {/* Loops through every cell in the array */}
       {cells.map((cell) => {
         // Checks if the target is located in this cell
         const hasTarget = cell.x === target.x && cell.y === target.y;
+
+        const agent = agents.find(
+          (agent) => agent.x === cell.x && agent.y === cell.y,
+        );
 
         // Creates and returns a div for each cell
         return (
@@ -23,6 +29,7 @@ function Map({ cells, target }: MapProps) {
           >
             {/* Shows a red X if the target is in this cell */}
             {hasTarget && <span className="target">×</span>}
+            {agent && <Agent agent={agent} />}
           </div>
         );
       })}
