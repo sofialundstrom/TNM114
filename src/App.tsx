@@ -6,6 +6,8 @@ import { createMap, target } from "./data/mapData";
 import { initialAgents } from "./data/agentData";
 import { canMoveTo } from "./movement/movement";
 import { markAsSearched } from "./search/search";
+import { findPath } from "./pathfinding/pathfinding";
+
 
 function App() {
   // Stores the current state of the map
@@ -14,6 +16,8 @@ function App() {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   // Stores if target is found
   const [targetFound, setTargetFound] = useState(false);
+  console.log(findPath({ x: 0, y: 0 }, { x: 10, y: 10 }, cells)); // <-- här
+
 
   function moveAgents(dx: number, dy: number) {
     setAgents((currentAgents) =>
