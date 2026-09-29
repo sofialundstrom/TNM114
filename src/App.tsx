@@ -1,8 +1,8 @@
 import "./App.css";
 import { useState } from "react";
-import type { Agent } from "./types/types";
+import type { Agent, Target } from "./types/types";
 import Map from "./components/Map";
-import { createMap, target } from "./data/mapData";
+import { createMap, createRandomTarget } from "./data/mapData";
 import { initialAgents } from "./data/agentData";
 import { canMoveTo } from "./movement/movement";
 import { markAsSearched } from "./search/search";
@@ -15,6 +15,8 @@ function App() {
   const [cells, setCells] = useState(() =>
     initializeProbabilities(createMap()),
   );
+  // Creates a random target when the simulation starts
+  const [target] = useState<Target>(() => createRandomTarget(cells));
   // Stores the agents' current positions
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   // Stores if target is found

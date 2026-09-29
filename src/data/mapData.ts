@@ -3,10 +3,18 @@ import type { Cell, Terrain, Target } from "../types/types";
 const MAP_WIDTH = 20;
 const MAP_HEIGHT = 20;
 
-export const target: Target = {
-  x: 5,
-  y: 6,
-};
+// Creates a target at a random searchable position
+export function createRandomTarget(cells: Cell[]): Target {
+  const searchableCells = cells.filter((cell) => cell.terrain !== "water");
+
+  const randomIndex = Math.floor(Math.random() * searchableCells.length);
+  const randomCell = searchableCells[randomIndex];
+
+  return {
+    x: randomCell.x,
+    y: randomCell.y,
+  };
+}
 
 function getTerrain(x: number, y: number): Terrain {
   if (x < 7 && y < 10) {
