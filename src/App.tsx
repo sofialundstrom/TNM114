@@ -13,10 +13,21 @@ function App() {
 
   function moveAgents() {
     setAgents((currentAgents) =>
-      currentAgents.map((agent) => ({
-        ...agent,
-        x: agent.x + 1,
-      })),
+      currentAgents.map((agent) => {
+        // Find the cell one step to the right
+        const nextCell = cells.find(
+          (cell) => cell.x === agent.x + 1 && cell.y === agent.y,
+        );
+
+        // Don't move if the cell is outside the map or is water
+        if (!nextCell || nextCell.terrain === "water") {
+          return agent;
+        }
+        return {
+          ...agent,
+          x: agent.x + 1,
+        };
+      }),
     );
   }
 
