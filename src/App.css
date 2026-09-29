@@ -61,3 +61,7 @@
   font-weight: bold;
   line-height: 1;
 }
+
+.searched {
+  filter: brightness(0.6);
+}

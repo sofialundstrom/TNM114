@@ -25,7 +25,7 @@ function Map({ cells, target, agents }: MapProps) {
             // Unique key for each cell, e.g. "4-7" for x=4, y=7
             key={`${cell.x}-${cell.y}`}
             // Adds "cell", the terrain type, and "target" if the target is here
-            className={`cell ${cell.terrain}`}
+            className={`cell ${cell.terrain} ${cell.searched === 1 ? "searched" : ""}`}
           >
             {/* Shows a red X if the target is in this cell */}
             {hasTarget && <span className="target">×</span>}

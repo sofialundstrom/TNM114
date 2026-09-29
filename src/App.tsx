@@ -4,31 +4,58 @@ import type { Agent } from "./types/types";
 import Map from "./components/Map";
 import { createMap, target } from "./data/mapData";
 import { initialAgents } from "./data/agentData";
-
-const cells = createMap();
+import { canMoveTo } from "./movement/movement";
+import { markAsSearched } from "./search/search";
 
 function App() {
+  // Stores the current state of the map
+  const [cells, setCells] = useState(createMap());
   // Stores the agents' current positions
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
+  // Stores if target is found
+  const [targetFound, setTargetFound] = useState(false);
 
-  function moveAgents() {
+  function moveAgents(dx: number, dy: number) {
     setAgents((currentAgents) =>
       currentAgents.map((agent) => {
-        // Find the cell one step to the right
-        const nextCell = cells.find(
-          (cell) => cell.x === agent.x + 1 && cell.y === agent.y,
-        );
+        // Calculate the position the agent wants to move to
+        const newX = agent.x + dx;
+        const newY = agent.y + dy;
 
-        // Don't move if the cell is outside the map or is water
-        if (!nextCell || nextCell.terrain === "water") {
+        // Stay in place if the new position is invalid
+        if (!canMoveTo(newX, newY, cells)) {
           return agent;
         }
+
+        // Move to the new position
         return {
           ...agent,
-          x: agent.x + 1,
+          x: newX,
+          y: newY,
         };
       }),
     );
+  }
+
+  function search() {
+    setCells((currentCells) => {
+      let updatedCells = currentCells;
+
+      agents.forEach((agent) => {
+        updatedCells = markAsSearched(updatedCells, agent.x, agent.y);
+      });
+
+      return updatedCells;
+    });
+    // Check if an agent searches the target's position
+
+    const found = agents.some(
+      (agent) => agent.x === target.x && agent.y === target.y,
+    );
+
+    if (found) {
+      setTargetFound(true);
+    }
   }
 
   return (
@@ -37,7 +64,12 @@ function App() {
       <div>
         <Map cells={cells} target={target} agents={agents} />
       </div>
-      <button onClick={moveAgents}>Move agents</button>
+      <button onClick={() => moveAgents(0, -1)}>↑</button>
+      <button onClick={() => moveAgents(-1, 0)}>←</button>
+      <button onClick={() => moveAgents(1, 0)}>→</button>
+      <button onClick={() => moveAgents(0, 1)}>↓</button>
+      <button onClick={search}>Search</button>
+      {targetFound && <p>Target found!</p>}
     </div>
   );
 }
