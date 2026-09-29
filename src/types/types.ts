@@ -20,3 +20,4 @@ export type Agent = {
   x: number;
   y: number;
 };
+export type ClueType = "trees" | "park" | "buildings" | "open";

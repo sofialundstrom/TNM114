@@ -6,10 +6,13 @@ import { createMap, target } from "./data/mapData";
 import { initialAgents } from "./data/agentData";
 import { canMoveTo } from "./movement/movement";
 import { markAsSearched } from "./search/search";
+import { initializeProbabilities } from "./ai/bayesian";
 
 function App() {
   // Stores the current state of the map
-  const [cells, setCells] = useState(createMap());
+  const [cells, setCells] = useState(() =>
+    initializeProbabilities(createMap()),
+  );
   // Stores the agents' current positions
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   // Stores if target is found
