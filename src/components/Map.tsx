@@ -27,6 +27,9 @@ function Map({ cells, target, agents }: MapProps) {
             // Adds "cell", the terrain type, and "target" if the target is here
             className={`cell ${cell.terrain} ${cell.searched === 1 ? "searched" : ""}`}
           >
+            <span className="probability">
+              {(cell.probability * 100).toFixed(1)}
+            </span>
             {/* Shows a red X if the target is in this cell */}
             {hasTarget && <span className="target">×</span>}
             {agent && <Agent agent={agent} />}

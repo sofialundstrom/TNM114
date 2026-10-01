@@ -1,14 +1,15 @@
 import "./App.css";
 import { useState } from "react";
-import type { Agent, Target } from "./types/types";
+import type { Agent, Target, ClueType } from "./types/types";
 import Map from "./components/Map";
 import { createMap, createRandomTarget } from "./data/mapData";
 import { initialAgents } from "./data/agentData";
 import { canMoveTo } from "./movement/movement";
 import { markAsSearched } from "./search/search";
 import { findPath } from "./pathfinding/pathfinding";
+import { createClue } from "./data/clueData";
 
-import { initializeProbabilities } from "./ai/bayesian";
+import { initializeProbabilities, updateProbabilities } from "./ai/bayesian";
 
 function App() {
   // Stores the current state of the map
@@ -17,11 +18,17 @@ function App() {
   );
   // Creates a random target when the simulation starts
   const [target] = useState<Target>(() => createRandomTarget(cells));
+  const [clue] = useState<ClueType>(() => createClue(cells, target));
   // Stores the agents' current positions
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   // Stores if target is found
   const [targetFound, setTargetFound] = useState(false);
   console.log(findPath({ x: 0, y: 0 }, { x: 10, y: 10 }, cells)); // <-- här
+
+  // Updates the probability map based on the clue
+  function useClue() {
+    setCells((currentCells) => updateProbabilities(currentCells, clue));
+  }
 
   function moveAgents(dx: number, dy: number) {
     setAgents((currentAgents) =>
@@ -69,6 +76,7 @@ function App() {
   return (
     <div>
       <h1>Swarm Intelligence</h1>
+      <p>Clue: {clue}</p>
       <div>
         <Map cells={cells} target={target} agents={agents} />
       </div>
@@ -77,6 +85,7 @@ function App() {
       <button onClick={() => moveAgents(1, 0)}>→</button>
       <button onClick={() => moveAgents(0, 1)}>↓</button>
       <button onClick={search}>Search</button>
+      <button onClick={useClue}>Use clue</button>
       {targetFound && <p>Target found!</p>}
     </div>
   );
