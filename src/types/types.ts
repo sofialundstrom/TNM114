@@ -1,4 +1,5 @@
 export type Terrain = "forest" | "park" | "urban" | "field" | "water";
+export type ClueType = "trees" | "park" | "buildings" | "open";
 
 // one cell in the grid
 export type Cell = {
@@ -19,5 +20,10 @@ export type Agent = {
   id: number;
   x: number;
   y: number;
-};
-export type ClueType = "trees" | "park" | "buildings" | "open";
+  path: Position[];
+}
+
+export type Position = {
+  x: number;
+  y: number;
+}
