@@ -9,7 +9,11 @@ import { markAsSearched } from "./search/search";
 import { findPath } from "./pathfinding/pathfinding";
 import { createClue } from "./data/clueData";
 
-import { initializeProbabilities, updateProbabilities } from "./ai/bayesian";
+import {
+  initializeProbabilities,
+  updateProbabilities,
+  updateAfterSearch,
+} from "./ai/bayesian";
 
 function App() {
   // Stores the current state of the map
@@ -58,6 +62,12 @@ function App() {
 
       agents.forEach((agent) => {
         updatedCells = markAsSearched(updatedCells, agent.x, agent.y);
+
+        const foundTarget = agent.x === target.x && agent.y === target.y;
+
+        if (!foundTarget) {
+          updatedCells = updateAfterSearch(updatedCells, agent.x, agent.y);
+        }
       });
 
       return updatedCells;

@@ -113,3 +113,27 @@ function normalizeProbabilities(cells: Cell[]): Cell[] {
     probability: cell.probability / totalProbability,
   }));
 }
+
+// Sets the found target position to probability 1
+export function updateAfterFound(cells: Cell[], x: number, y: number): Cell[] {
+  return cells.map((cell) => ({
+    ...cell,
+    probability: cell.x === x && cell.y === y ? 1 : 0,
+  }));
+}
+
+// Removes the probability from a searched cell
+export function updateAfterSearch(cells: Cell[], x: number, y: number): Cell[] {
+  const updatedCells = cells.map((cell) => {
+    if (cell.x === x && cell.y === y) {
+      return {
+        ...cell,
+        probability: 0,
+      };
+    }
+
+    return cell;
+  });
+
+  return normalizeProbabilities(updatedCells);
+}
