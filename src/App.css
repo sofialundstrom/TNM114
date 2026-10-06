@@ -10,27 +10,31 @@
   height: 25px;
 }
 
-/* Färg beroende på terräng */
+/* Bild beroende på terräng */
 .forest {
-  background-color: darkgreen;
+  background-image: url("./assets/terrain/forest.png");
+  background-size: cover;
 }
 
 .park {
-  background-color: lightgreen;
+  background-image: url("./assets/terrain/park.png");
+  background-size: cover;
 }
 
 .urban {
-  background-color: gray;
+  background-image: url("./assets/terrain/urban.png");
+  background-size: cover;
 }
 
 .field {
-  background-color: wheat;
+  background-image: url("./assets/terrain/field.png");
+  background-size: cover;
 }
 
 .water {
-  background-color: lightblue;
+  background-image: url("./assets/terrain/water.png");
+  background-size: cover;
 }
-
 /* Centrerar hela appens innehåll på skärmen */
 #root {
   min-height: 100vh;
@@ -64,4 +68,11 @@
 
 .searched {
   filter: brightness(0.6);
+}
+
+.agent {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  z-index: 2;
 }
