@@ -5,9 +5,9 @@ type MapProps = {
   cells: Cell[];
   target: Target;
   agents: AgentType[];
+  showProbabilities: boolean;
 };
-
-function Map({ cells, target, agents }: MapProps) {
+function Map({ cells, target, agents, showProbabilities }: MapProps) {
   return (
     <div className="map">
       {/* Loops through every cell in the array */}
@@ -27,9 +27,11 @@ function Map({ cells, target, agents }: MapProps) {
             // Adds "cell", the terrain type, and "target" if the target is here
             className={`cell ${cell.terrain} ${cell.searched === 1 ? "searched" : ""}`}
           >
-            <span className="probability">
-              {(cell.probability * 100).toFixed(1)}
-            </span>
+            {showProbabilities && (
+              <span className="probability">
+                {(cell.probability * 100).toFixed(1)}
+              </span>
+            )}
             {/* Shows a red X if the target is in this cell */}
             {hasTarget && <span className="target">×</span>}
             {agent && <Agent agent={agent} />}
