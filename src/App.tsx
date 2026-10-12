@@ -85,8 +85,8 @@ function App() {
 
   return (
     <div>
-      <h1>Swarm Intelligence</h1>
-      <p>Clue: {clue}</p>
+      <h1 className="title">Swarm Intelligence</h1>
+      <p className="clue">Clue: {clue}</p>
       <div>
         <Map
           cells={cells}
@@ -95,7 +95,7 @@ function App() {
           showProbabilities={showProbabilities}
         />
       </div>
-      <button
+      <button className="button"
         onClick={() => {
           if (!running && !clueUsed) {
             setCells((currentCells) => updateProbabilities(currentCells, clue));
@@ -105,9 +105,9 @@ function App() {
           setRunning((r) => !r);
         }}
       >
-        {running ? "Pause" : "Start"}
+        {running ? "Stop" : "Start"}
       </button>
-      <button onClick={() => setShowProbabilities((show) => !show)}>
+      <button className="button" onClick={() => setShowProbabilities((show) => !show)}>
         {showProbabilities ? "Hide probabilities" : "Show probabilities"}
       </button>
       {targetFound && <p>Target found!</p>}
