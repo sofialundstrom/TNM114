@@ -1,25 +1,67 @@
 import type { Cell, ClueType, Target } from "../types/types";
 
-// Creates a clue based on the terrain where the target is located
+const CLUE_RADIUS = 3;
+
+// Converts terrain to the clue associated with it
+function terrainToClue(terrain: Cell["terrain"]): ClueType | null {
+  switch (terrain) {
+    case "forest":
+      return "trees";
+    case "park":
+      return "park";
+    case "urban":
+      return "buildings";
+    case "field":
+      return "open";
+    case "water":
+      return null;
+  }
+}
+
+// Creates a clue based on the environment around the target
 export function createClue(cells: Cell[], target: Target): ClueType {
-  const targetCell = cells.find(
-    (cell) => cell.x === target.x && cell.y === target.y,
-  );
+  const nearbyCells = cells.filter((cell) => {
+    const distance = Math.abs(cell.x - target.x) + Math.abs(cell.y - target.y);
 
-  if (targetCell?.terrain === "forest") {
-    return "trees";
+    return distance <= CLUE_RADIUS && cell.terrain !== "water";
+  });
+
+  // Give nearby terrain more influence than terrain further away
+  const clueWeights: Record<ClueType, number> = {
+    trees: 0,
+    park: 0,
+    buildings: 0,
+    open: 0,
+  };
+
+  for (const cell of nearbyCells) {
+    const clue = terrainToClue(cell.terrain);
+
+    if (!clue) continue;
+
+    const distance = Math.abs(cell.x - target.x) + Math.abs(cell.y - target.y);
+
+    // Closer terrain has a larger influence on the clue
+    const weight = 1 / (distance + 1);
+
+    clueWeights[clue] += weight;
   }
 
-  if (targetCell?.terrain === "park") {
-    return "park";
-  }
+  // Randomly choose a clue based on the surrounding terrain
+  const totalWeight =
+    clueWeights.trees +
+    clueWeights.park +
+    clueWeights.buildings +
+    clueWeights.open;
 
-  if (targetCell?.terrain === "urban") {
-    return "buildings";
-  }
+  let random = Math.random() * totalWeight;
 
-  if (targetCell?.terrain === "field") {
-    return "open";
+  for (const clue of Object.keys(clueWeights) as ClueType[]) {
+    random -= clueWeights[clue];
+
+    if (random <= 0) {
+      return clue;
+    }
   }
 
   return "open";

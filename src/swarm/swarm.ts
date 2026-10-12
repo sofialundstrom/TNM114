@@ -10,6 +10,8 @@ const AGENT_PENALTY = 0.6;
 // Encourages agents to continue searching their current local area
 const LOCAL_SEARCH_RADIUS = 3;
 const LOCAL_SEARCH_BONUS = 1.5;
+// Fraction of agents that explore less likely areas
+const EXPLORER_RATIO = 0.2;
 
 const distance = (a: Position, b: Position) =>
   Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -44,14 +46,38 @@ function getAreaCoverage(cell: Cell, cells: Cell[]): number {
   return searchedCells.length / nearbyCells.length;
 }
 
+// Calculates how close a cell is to a high-probability area
+function getFrontierScore(cell: Cell, cells: Cell[]): number {
+  const FRONTIER_RADIUS = 3;
+
+  const nearbyCells = cells.filter(
+    (otherCell) =>
+      distance(cell, otherCell) <= FRONTIER_RADIUS &&
+      otherCell.terrain !== "water",
+  );
+
+  if (nearbyCells.length === 0) return 0;
+
+  // Find the highest probability close to this cell
+  return Math.max(...nearbyCells.map((otherCell) => otherCell.probability));
+}
+
 // Väljer en destination för varje agent.
 // Returnerar en lista i samma ordning som agents.
 export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
   const chosen: Position[] = [];
 
-  for (const agent of agents) {
+  for (const [agentIndex, agent] of agents.entries()) {
     let best: Position = { x: agent.x, y: agent.y }; // stanna om inget bättre finns
     let bestScore = -Infinity;
+
+    // A small part of the swarm explores alternative areas
+    const explorerCount = Math.max(
+      1,
+      Math.floor(agents.length * EXPLORER_RATIO),
+    );
+
+    const isExplorer = agentIndex >= agents.length - explorerCount;
 
     for (const cell of cells) {
       // Hoppa över sökta rutor och rutor man inte kan gå till (vatten)
@@ -65,7 +91,20 @@ export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
       const areaProbability = getAreaProbability(cell, cells);
       const areaCoverage = getAreaCoverage(cell, cells);
 
-      let score = (cell.probability + areaProbability) / distancePenalty;
+      const probabilityScore = cell.probability + areaProbability;
+      const frontierScore = getFrontierScore(cell, cells);
+
+      let score: number;
+
+      if (isExplorer) {
+        // Explorers prefer cells close to high-probability areas
+        const frontierBonus = frontierScore * 2;
+
+        score = (probabilityScore + frontierBonus) / distancePenalty;
+      } else {
+        // Normal agents search the most probable areas
+        score = probabilityScore / distancePenalty;
+      }
 
       // Prefer areas that have not already been heavily searched
       score *= 1 - areaCoverage * 0.7;
