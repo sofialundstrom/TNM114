@@ -66,3 +66,17 @@ export function createClue(cells: Cell[], target: Target): ClueType {
 
   return "open";
 }
+
+// Converts a clue type into text shown to the user
+export function getClueText(clue: ClueType): string {
+  switch (clue) {
+    case "trees":
+      return "i see trees";
+    case "park":
+      return "i think im in a park";
+    case "buildings":
+      return "there are buildings near me";
+    case "open":
+      return "the terrain is very open";
+  }
+}
