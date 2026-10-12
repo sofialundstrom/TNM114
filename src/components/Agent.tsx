@@ -1,5 +1,5 @@
 import type { Agent as AgentType } from "../types/types";
-import redAgent from "../assets/agents/red_agent.png";
+import redAgent from "../assets/people/red_agent.png";
 
 type AgentProps = {
   agent: AgentType;
