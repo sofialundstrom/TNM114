@@ -7,20 +7,20 @@ export function createClue(cells: Cell[], target: Target): ClueType {
   );
 
   if (targetCell?.terrain === "forest") {
-    return "trees";
+    return "i see trees";
   }
 
   if (targetCell?.terrain === "park") {
-    return "park";
+    return "i think im in a park";
   }
 
   if (targetCell?.terrain === "urban") {
-    return "buildings";
+    return "there are buildings near me";
   }
 
   if (targetCell?.terrain === "field") {
-    return "open";
+    return "the terrain is very open";
   }
 
-  return "open";
+  return "the terrain is very open";
 }
