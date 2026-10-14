@@ -20,72 +20,61 @@ export function initializeProbabilities(cells: Cell[]): Cell[] {
     };
   });
 }
-// Returns how well a terrain matches a specific clue
-function getLikelihood(terrain: Cell["terrain"], clue: ClueType): number {
-  if (clue === "trees") {
-    switch (terrain) {
+
+// Calculates the probability of a clue based on surrounding terrain
+function getLikelihood(cell: Cell, cells: Cell[], clue: ClueType): number {
+  const clueWeights: Record<ClueType, number> = {
+    trees: 0,
+    park: 0,
+    buildings: 0,
+    open: 0,
+  };
+
+  for (const nearbyCell of cells) {
+    const distance =
+      Math.abs(nearbyCell.x - cell.x) + Math.abs(nearbyCell.y - cell.y);
+
+    // Only consider the current cell and directly adjacent cells
+    if (distance > 1 || nearbyCell.terrain === "water") {
+      continue;
+    }
+
+    const weight = 1 / (distance + 1);
+
+    switch (nearbyCell.terrain) {
       case "forest":
-        return 1.0;
+        clueWeights.trees += weight;
+        break;
       case "park":
-        return 0.7;
-      case "field":
-        return 0.3;
+        clueWeights.park += weight;
+        break;
       case "urban":
-        return 0.15;
-      case "water":
-        return 0;
+        clueWeights.buildings += weight;
+        break;
+      case "field":
+        clueWeights.open += weight;
+        break;
     }
   }
 
-  if (clue === "park") {
-    switch (terrain) {
-      case "forest":
-        return 0.5;
-      case "park":
-        return 1.0;
-      case "field":
-        return 0.5;
-      case "urban":
-        return 0.3;
-      case "water":
-        return 0;
-    }
-  }
-  if (clue === "buildings") {
-    switch (terrain) {
-      case "forest":
-        return 0.1;
-      case "park":
-        return 0.3;
-      case "field":
-        return 0.1;
-      case "urban":
-        return 1.0;
-      case "water":
-        return 0;
-    }
+  const totalWeight =
+    clueWeights.trees +
+    clueWeights.park +
+    clueWeights.buildings +
+    clueWeights.open;
+
+  if (totalWeight === 0) {
+    return 0;
   }
 
-  if (clue === "open") {
-    switch (terrain) {
-      case "forest":
-        return 0.2;
-      case "park":
-        return 0.5;
-      case "field":
-        return 1.0;
-      case "urban":
-        return 0.1;
-      case "water":
-        return 0;
-    }
-  }
-  return 0;
+  // Probability of receiving this clue at this position
+  return clueWeights[clue] / totalWeight;
 }
-// Updates probabilities based on a clue
+
+// Updates probabilities using Bayesian reasoning
 export function updateProbabilities(cells: Cell[], clue: ClueType): Cell[] {
   const updatedCells = cells.map((cell) => {
-    const likelihood = getLikelihood(cell.terrain, clue);
+    const likelihood = getLikelihood(cell, cells, clue);
 
     return {
       ...cell,

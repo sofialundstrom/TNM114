@@ -32,6 +32,9 @@ function App() {
   // Stores if target is found
   const [targetFound, setTargetFound] = useState(false);
   const [running, setRunning] = useState(false);
+  // Tracks search efficiency
+  const [totalSteps, setTotalSteps] = useState(0);
+  const [searchRounds, setSearchRounds] = useState(0);
 
   function step() {
     // 1. Agenter utan väg: sök av rutan de står på, och välj nytt mål
@@ -66,8 +69,14 @@ function App() {
 
       // Gå ett steg
       const [next, ...rest] = path;
+      if (next) {
+        setTotalSteps((prev) => prev + 1);
+      }
       return next ? { ...a, x: next.x, y: next.y, path: rest } : { ...a, path };
     });
+
+    // Count one simulation round
+    setSearchRounds((prev) => prev + 1);
 
     setCells(updatedCells);
     setAgents(nextAgents);
@@ -82,6 +91,16 @@ function App() {
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, targetFound, agents, cells]);
+
+  const cellsSearched = cells.filter((cell) => cell.searched === 1).length;
+
+  const efficiencyScore =
+    100 /
+    (1 +
+      0.01 *
+        (Math.max(0, searchRounds - 1) +
+          totalSteps / agents.length +
+          Math.max(0, cellsSearched - 1)));
 
   return (
     <div>
@@ -115,6 +134,18 @@ function App() {
         {showProbabilities ? "Hide probabilities" : "Show probabilities"}
       </button>
       {targetFound && <p>Target found!</p>}
+      <div className="results">
+        <h2>Search Statistics</h2>
+
+        {targetFound && <p>Efficiency Score: {efficiencyScore.toFixed(1)}</p>}
+        <p>Total steps: {totalSteps}</p>
+
+        <p>
+          Cells searched: {cells.filter((cell) => cell.searched === 1).length}
+        </p>
+
+        <p>Search rounds: {searchRounds}</p>
+      </div>
     </div>
   );
 }

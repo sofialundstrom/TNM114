@@ -1,6 +1,6 @@
 import type { Cell, ClueType, Target } from "../types/types";
 
-const CLUE_RADIUS = 3;
+const CLUE_RADIUS = 1;
 
 // Converts terrain to the clue associated with it
 function terrainToClue(terrain: Cell["terrain"]): ClueType | null {
@@ -46,7 +46,6 @@ export function createClue(cells: Cell[], target: Target): ClueType {
 
     clueWeights[clue] += weight;
   }
-
   // Randomly choose a clue based on the surrounding terrain
   const totalWeight =
     clueWeights.trees +
@@ -59,12 +58,16 @@ export function createClue(cells: Cell[], target: Target): ClueType {
   for (const clue of Object.keys(clueWeights) as ClueType[]) {
     random -= clueWeights[clue];
 
-    if (random <= 0) {
+    if (random <= 0 && clueWeights[clue] > 0) {
       return clue;
     }
   }
 
-  return "open";
+  return (
+    (Object.keys(clueWeights) as ClueType[]).find(
+      (clue) => clueWeights[clue] > 0,
+    ) ?? "buildings"
+  );
 }
 
 // Converts a clue type into text shown to the user
