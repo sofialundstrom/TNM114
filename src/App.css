@@ -116,4 +116,20 @@ h1 {
   color: #ffffff;
   font-size: 60px;
   padding-bottom: 20px
-} 
+}
+
+.sliders {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+ 
+}
+
+.clue {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 25px;
+  font-style: normal;
+  padding: 20px;
+}

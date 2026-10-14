@@ -7,11 +7,9 @@ const SPREAD_RADIUS = 5;
 const SPREAD_PENALTY = 0.5;
 // How much the score decreases near another agent
 const AGENT_PENALTY = 0.6;
-// Encourages agents to continue searching their current local area
+// Encourages scouts to continue searching their current local area
 const LOCAL_SEARCH_RADIUS = 3;
 const LOCAL_SEARCH_BONUS = 1.5;
-// Fraction of agents that explore less likely areas
-const EXPLORER_RATIO = 0.2;
 
 const distance = (a: Position, b: Position) =>
   Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -30,7 +28,6 @@ function getAreaProbability(cell: Cell, cells: Cell[]): number {
 }
 
 // Calculates how much of the surrounding area has already been searched
-
 function getAreaCoverage(cell: Cell, cells: Cell[]): number {
   const nearbyCells = cells.filter(
     (otherCell) =>
@@ -67,17 +64,9 @@ function getFrontierScore(cell: Cell, cells: Cell[]): number {
 export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
   const chosen: Position[] = [];
 
-  for (const [agentIndex, agent] of agents.entries()) {
+  for (const agent of agents) {
     let best: Position = { x: agent.x, y: agent.y }; // stanna om inget bättre finns
     let bestScore = -Infinity;
-
-    // A small part of the swarm explores alternative areas
-    const explorerCount = Math.max(
-      1,
-      Math.floor(agents.length * EXPLORER_RATIO),
-    );
-
-    const isExplorer = agentIndex >= agents.length - explorerCount;
 
     for (const cell of cells) {
       // Hoppa över sökta rutor och rutor man inte kan gå till (vatten)
@@ -85,8 +74,6 @@ export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
       if (!canMoveTo(cell.x, cell.y, cells)) continue;
 
       const cellDistance = distance(agent, cell);
-
-      const distancePenalty = 1 + cellDistance * 0.1;
 
       const areaProbability = getAreaProbability(cell, cells);
       const areaCoverage = getAreaCoverage(cell, cells);
@@ -96,23 +83,23 @@ export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
 
       let score: number;
 
-      if (isExplorer) {
-        // Explorers prefer cells close to high-probability areas
-        const frontierBonus = frontierScore * 2;
+      if (agent.role === "scout") {
+        // Scouts: stannar nära och söker av området runtomkring.
+        // Frontier-bonusen drar dem mot rutor nära högsannolika områden.
+        const nearness = 1 / (1 + cellDistance * 0.5);
+        score = (probabilityScore + frontierScore * 2) * nearness;
 
-        score = (probabilityScore + frontierBonus) / distancePenalty;
+        if (cellDistance <= LOCAL_SEARCH_RADIUS) {
+          score *= LOCAL_SEARCH_BONUS;
+        }
       } else {
-        // Normal agents search the most probable areas
-        score = probabilityScore / distancePenalty;
+        // Clue-agenter: går mot där ledtråden säger att sannolikheten är högst.
+        // Svagt avståndsstraff, så de gärna går långt.
+        score = probabilityScore / (1 + cellDistance * 0.02);
       }
 
       // Prefer areas that have not already been heavily searched
       score *= 1 - areaCoverage * 0.7;
-
-      // Prefer nearby cells so the agent searches an area systematically
-      if (cellDistance <= LOCAL_SEARCH_RADIUS) {
-        score *= LOCAL_SEARCH_BONUS;
-      }
 
       // Avoid areas where other agents already are
       for (const otherAgent of agents) {

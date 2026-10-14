@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import type { Agent, Target, ClueType } from "./types/types";
 import Map from "./components/Map";
 import { createMap, createRandomTarget } from "./data/mapData";
-import { initialAgents } from "./data/agentData";
 import { markAsSearched } from "./search/search";
 import { findPath } from "./pathfinding/pathfinding";
 import { createClue, getClueText } from "./data/clueData";
 import { assignDestinations } from "./swarm/swarm";
+import { createAgents, MAX_PER_TYPE } from "./data/agentData";
 
 import {
   initializeProbabilities,
@@ -21,91 +21,144 @@ function App() {
   const [cells, setCells] = useState(() =>
     initializeProbabilities(createMap()),
   );
-  // Creates a random target when the simulation starts
+
+  // Creates a random target and clue
   const [target] = useState<Target>(() => createRandomTarget(cells));
   const [clue] = useState<ClueType>(() => createClue(cells, target));
+
   const [clueUsed, setClueUsed] = useState(false);
   const [showProbabilities, setShowProbabilities] = useState(false);
-  // Stores the agents' current positions
-  const [agents, setAgents] = useState<Agent[]>(initialAgents);
 
-  // Stores if target is found
+  // Agent controls
+  const [scoutCount, setScoutCount] = useState(2);
+  const [clueCount, setClueCount] = useState(2);
+  const [agents, setAgents] = useState<Agent[]>(() => createAgents(2, 2));
+
+  function updateAgents(scouts: number, clues: number) {
+    setScoutCount(scouts);
+    setClueCount(clues);
+    setAgents(createAgents(scouts, clues));
+  }
+
+  // Simulation state
   const [targetFound, setTargetFound] = useState(false);
   const [running, setRunning] = useState(false);
-  // Tracks search efficiency
+
+  // Search statistics
   const [totalSteps, setTotalSteps] = useState(0);
   const [searchRounds, setSearchRounds] = useState(0);
 
   function step() {
-    // 1. Agenter utan väg: sök av rutan de står på, och välj nytt mål
     let updatedCells = cells;
     let found = false;
 
+    // Find agents that have reached their destination
     const idle = agents.filter((a) => a.path.length === 0);
 
-    // Sök av rutan där en stillastående agent står
-    idle.forEach((a) => {
-      updatedCells = markAsSearched(updatedCells, a.x, a.y);
+    // Search the current cell
+    for (const agent of idle) {
+      updatedCells = markAsSearched(updatedCells, agent.x, agent.y);
 
-      const foundTarget = a.x === target.x && a.y === target.y;
+      const foundTarget =
+        agent.x === target.x && agent.y === target.y;
 
       if (foundTarget) {
         found = true;
-        updatedCells = updateAfterFound(updatedCells, a.x, a.y);
-      } else {
-        updatedCells = updateAfterSearch(updatedCells, a.x, a.y);
-      }
-    });
-
-    // Välj nya destinationer (med de uppdaterade cellerna)
-    const destinations = assignDestinations(agents, updatedCells);
-
-    const nextAgents = agents.map((a, i) => {
-      let path = a.path;
-
-      if (path.length === 0) {
-        path = findPath(a, destinations[i], updatedCells);
+        updatedCells = updateAfterFound(
+          updatedCells,
+          agent.x,
+          agent.y,
+        );
+        break;
       }
 
-      // Gå ett steg
-      const [next, ...rest] = path;
-      if (next) {
-        setTotalSteps((prev) => prev + 1);
-      }
-      return next ? { ...a, x: next.x, y: next.y, path: rest } : { ...a, path };
-    });
+      updatedCells = updateAfterSearch(
+        updatedCells,
+        agent.x,
+        agent.y,
+      );
+    }
 
     // Count one simulation round
     setSearchRounds((prev) => prev + 1);
 
+    // Stop immediately when the target is found
+    if (found) {
+      setCells(updatedCells);
+      setTargetFound(true);
+      setRunning(false);
+      return;
+    }
+
+    // Assign destinations using swarm intelligence
+    const destinations = assignDestinations(agents, updatedCells);
+
+    let movements = 0;
+
+    // Move agents using A* paths
+    const nextAgents = agents.map((agent, i) => {
+      let path = agent.path;
+
+      if (path.length === 0) {
+        path = findPath(agent, destinations[i], updatedCells);
+      }
+
+      const [next, ...rest] = path;
+
+      if (next) {
+        movements++;
+
+        return {
+          ...agent,
+          x: next.x,
+          y: next.y,
+          path: rest,
+        };
+      }
+
+      return {
+        ...agent,
+        path,
+      };
+    });
+
+    setTotalSteps((prev) => prev + movements);
     setCells(updatedCells);
     setAgents(nextAgents);
-    if (found) setTargetFound(true);
   }
 
   useEffect(() => {
-    // Stanna om simuleringen är pausad eller målet är hittat
-    if (!running || targetFound) return;
+    // Stop when paused or target is found
+    if (!running || targetFound || agents.length === 0) return;
 
-    const id = setTimeout(step, 300); // 300 ms mellan varje steg
+    const id = setTimeout(step, 300);
+
     return () => clearTimeout(id);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, targetFound, agents, cells]);
 
-  const cellsSearched = cells.filter((cell) => cell.searched === 1).length;
+  // Calculate search statistics
+  const cellsSearched = cells.filter(
+    (cell) => cell.searched === 1,
+  ).length;
 
   const efficiencyScore =
     100 /
     (1 +
       0.01 *
         (Math.max(0, searchRounds - 1) +
-          totalSteps / agents.length +
+          totalSteps / Math.max(1, agents.length) +
           Math.max(0, cellsSearched - 1)));
 
   return (
     <div>
       <h1 className="title">Swarm Intelligence</h1>
-      <p className="clue">Clue: {getClueText(clue)}</p>
+
+      <p className="clue">
+        Clue: {getClueText(clue)}
+      </p>
+
       <div>
         <Map
           cells={cells}
@@ -114,36 +167,90 @@ function App() {
           showProbabilities={showProbabilities}
         />
       </div>
-      <button
-        className="button"
-        onClick={() => {
-          if (!running && !clueUsed) {
-            setCells((currentCells) => updateProbabilities(currentCells, clue));
-            setClueUsed(true);
-          }
 
-          setRunning((r) => !r);
-        }}
-      >
-        {running ? "Stop" : "Start"}
-      </button>
-      <button
-        className="button"
-        onClick={() => setShowProbabilities((show) => !show)}
-      >
-        {showProbabilities ? "Hide probabilities" : "Show probabilities"}
-      </button>
+      {/* Buttons */}
+      <div>
+        <button
+          className="button"
+          disabled={agents.length === 0 && !running}
+          onClick={() => {
+            if (!running && !clueUsed) {
+              setCells((currentCells) =>
+                updateProbabilities(currentCells, clue),
+              );
+
+              setClueUsed(true);
+            }
+
+            setRunning((r) => !r);
+          }}
+        >
+          {running ? "Stop" : "Start"}
+        </button>
+
+        <button
+          className="button"
+          onClick={() =>
+            setShowProbabilities((show) => !show)
+          }
+        >
+          {showProbabilities
+            ? "Hide probabilities"
+            : "Show probabilities"}
+        </button>
+      </div>
+
+      {/* Agent controls */}
+      <div className="sliders">
+        <label className="clue">
+          Scouts: {scoutCount}
+          <input
+            type="range"
+            min={0}
+            max={MAX_PER_TYPE}
+            value={scoutCount}
+            disabled={running || clueUsed}
+            onChange={(e) =>
+              updateAgents(
+                Number(e.target.value),
+                clueCount,
+              )
+            }
+          />
+        </label>
+
+        <label className="clue">
+          Clue agents: {clueCount}
+          <input
+            type="range"
+            min={0}
+            max={MAX_PER_TYPE}
+            value={clueCount}
+            disabled={running || clueUsed}
+            onChange={(e) =>
+              updateAgents(
+                scoutCount,
+                Number(e.target.value),
+              )
+            }
+          />
+        </label>
+      </div>
+
       {targetFound && <p>Target found!</p>}
+
+      {/* Search statistics */}
       <div className="results">
         <h2>Search Statistics</h2>
 
-        {targetFound && <p>Efficiency Score: {efficiencyScore.toFixed(1)}</p>}
+        {targetFound && (
+          <p>
+            Efficiency Score: {efficiencyScore.toFixed(1)} / 100
+          </p>
+        )}
+
         <p>Total steps: {totalSteps}</p>
-
-        <p>
-          Cells searched: {cells.filter((cell) => cell.searched === 1).length}
-        </p>
-
+        <p>Cells searched: {cellsSearched}</p>
         <p>Search rounds: {searchRounds}</p>
       </div>
     </div>
