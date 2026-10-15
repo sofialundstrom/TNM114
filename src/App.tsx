@@ -202,7 +202,7 @@ function App() {
 
       {/* Agent controls */}
       <div className="sliders">
-        <label className="clue">
+        <label className="scouts">
           Scouts: {scoutCount}
           <input
             type="range"
@@ -219,7 +219,7 @@ function App() {
           />
         </label>
 
-        <label className="clue">
+        <label className="scouts">
           Clue agents: {clueCount}
           <input
             type="range"

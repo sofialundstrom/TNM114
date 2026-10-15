@@ -119,12 +119,28 @@ h1 {
 }
 
 .sliders {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
- 
+display: grid;
+grid-template-columns: repeat(2,minmax(0, 1fr));
+gap: 16px;
+width: 100%;
+max-width: 100%;
+box-sizing: border-box;
+padding: 0 10px;
+}
+
+.sliders label {
+  display: block;
+  min-width: 0;
+  margin: 0;
+}
+
+.sliders input[type="range"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing:border-box;
+  margin: 8px;
 }
 
 .clue {
@@ -132,4 +148,12 @@ h1 {
   font-size: 25px;
   font-style: normal;
   padding: 20px;
+}
+
+.scouts {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 23px;
+  font-style: normal;
+  padding: 20px;
+  color: #ffffff;
 }
