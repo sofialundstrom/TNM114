@@ -23,9 +23,9 @@ export type Agent = {
   y: number;
   path: Position[];
   role: AgentRole;
-}
+};
 
 export type Position = {
   x: number;
   y: number;
-}
+};

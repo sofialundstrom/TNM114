@@ -78,24 +78,30 @@ export function assignDestinations(agents: Agent[], cells: Cell[]): Position[] {
       const areaProbability = getAreaProbability(cell, cells);
       const areaCoverage = getAreaCoverage(cell, cells);
 
-      const probabilityScore = cell.probability + areaProbability;
       const frontierScore = getFrontierScore(cell, cells);
 
       let score: number;
 
       if (agent.role === "scout") {
-        // Scouts: stannar nära och söker av området runtomkring.
-        // Frontier-bonusen drar dem mot rutor nära högsannolika områden.
-        const nearness = 1 / (1 + cellDistance * 0.5);
-        score = (probabilityScore + frontierScore * 2) * nearness;
+        // Scouts explore less probable areas
+        const explorationScore =
+          (1 - cell.probability) * 0.3 +
+          frontierScore * 2 +
+          areaProbability * 0.3;
+
+        score = explorationScore / (1 + cellDistance * 0.1);
 
         if (cellDistance <= LOCAL_SEARCH_RADIUS) {
           score *= LOCAL_SEARCH_BONUS;
         }
       } else {
-        // Clue-agenter: går mot där ledtråden säger att sannolikheten är högst.
-        // Svagt avståndsstraff, så de gärna går långt.
-        score = probabilityScore / (1 + cellDistance * 0.02);
+        // Clue agents prioritize high-probability areas
+        // and search locally once they arrive
+        const localBonus = cellDistance <= 3 ? 2 : 1;
+
+        score =
+          ((cell.probability * 3 + areaProbability) * localBonus) /
+          (1 + cellDistance * 0.02);
       }
 
       // Prefer areas that have not already been heavily searched

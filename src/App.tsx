@@ -59,24 +59,15 @@ function App() {
     for (const agent of idle) {
       updatedCells = markAsSearched(updatedCells, agent.x, agent.y);
 
-      const foundTarget =
-        agent.x === target.x && agent.y === target.y;
+      const foundTarget = agent.x === target.x && agent.y === target.y;
 
       if (foundTarget) {
         found = true;
-        updatedCells = updateAfterFound(
-          updatedCells,
-          agent.x,
-          agent.y,
-        );
+        updatedCells = updateAfterFound(updatedCells, agent.x, agent.y);
         break;
       }
 
-      updatedCells = updateAfterSearch(
-        updatedCells,
-        agent.x,
-        agent.y,
-      );
+      updatedCells = updateAfterSearch(updatedCells, agent.x, agent.y);
     }
 
     // Count one simulation round
@@ -139,25 +130,21 @@ function App() {
   }, [running, targetFound, agents, cells]);
 
   // Calculate search statistics
-  const cellsSearched = cells.filter(
-    (cell) => cell.searched === 1,
-  ).length;
+  const cellsSearched = cells.filter((cell) => cell.searched === 1).length;
 
   const efficiencyScore =
     100 /
     (1 +
-      0.01 *
-        (Math.max(0, searchRounds - 1) +
+      0.003 *
+        (searchRounds +
           totalSteps / Math.max(1, agents.length) +
-          Math.max(0, cellsSearched - 1)));
+          cellsSearched * 0.3));
 
   return (
     <div>
       <h1 className="title">Swarm Intelligence</h1>
 
-      <p className="clue">
-        Clue: {getClueText(clue)}
-      </p>
+      <p className="clue">Clue: {getClueText(clue)}</p>
 
       <div>
         <Map
@@ -190,13 +177,9 @@ function App() {
 
         <button
           className="button"
-          onClick={() =>
-            setShowProbabilities((show) => !show)
-          }
+          onClick={() => setShowProbabilities((show) => !show)}
         >
-          {showProbabilities
-            ? "Hide probabilities"
-            : "Show probabilities"}
+          {showProbabilities ? "Hide probabilities" : "Show probabilities"}
         </button>
       </div>
 
@@ -210,12 +193,7 @@ function App() {
             max={MAX_PER_TYPE}
             value={scoutCount}
             disabled={running || clueUsed}
-            onChange={(e) =>
-              updateAgents(
-                Number(e.target.value),
-                clueCount,
-              )
-            }
+            onChange={(e) => updateAgents(Number(e.target.value), clueCount)}
           />
         </label>
 
@@ -227,12 +205,7 @@ function App() {
             max={MAX_PER_TYPE}
             value={clueCount}
             disabled={running || clueUsed}
-            onChange={(e) =>
-              updateAgents(
-                scoutCount,
-                Number(e.target.value),
-              )
-            }
+            onChange={(e) => updateAgents(scoutCount, Number(e.target.value))}
           />
         </label>
       </div>
@@ -244,9 +217,7 @@ function App() {
         <h2>Search Statistics</h2>
 
         {targetFound && (
-          <p>
-            Efficiency Score: {efficiencyScore.toFixed(1)} / 100
-          </p>
+          <p>Efficiency Score: {efficiencyScore.toFixed(1)} / 100</p>
         )}
 
         <p>Total steps: {totalSteps}</p>
