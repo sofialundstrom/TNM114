@@ -23,6 +23,7 @@ export type Agent = {
   y: number;
   path: Position[];
   role: AgentRole;
+  moveTime?: number;
 };
 
 export type Position = {

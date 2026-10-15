@@ -28,7 +28,7 @@ function Map({ cells, target, agents, showProbabilities }: MapProps) {
             className={`cell ${cell.terrain} ${cell.searched === 1 ? "searched" : ""}`}
           >
             {showProbabilities && (
-              <span className="probability">
+              <span style={{ color: "black", fontSize: "15px" }}>
                 {(cell.probability * 100).toFixed(1)}
               </span>
             )}

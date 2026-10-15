@@ -86,7 +86,7 @@ h1 {
 
 .button {
   background-color: #000000;
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   font-style: bold;
   color: #ffffff;
   border: none;
@@ -100,7 +100,7 @@ h1 {
 }
 
 .clue {
-  font-family:Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   color: #ffffff;
   font-size: 30px;
   border: 1px solid #ffffff;
@@ -111,21 +111,21 @@ h1 {
 }
 
 .title {
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   font-style: bold;
   color: #ffffff;
   font-size: 60px;
-  padding-bottom: 20px
+  padding-bottom: 20px;
 }
 
 .sliders {
-display: grid;
-grid-template-columns: repeat(2,minmax(0, 1fr));
-gap: 16px;
-width: 100%;
-max-width: 100%;
-box-sizing: border-box;
-padding: 0 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 10px;
 }
 
 .sliders label {
@@ -139,21 +139,100 @@ padding: 0 10px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  box-sizing:border-box;
+  box-sizing: border-box;
   margin: 8px;
 }
 
 .clue {
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   font-size: 25px;
   font-style: normal;
   padding: 20px;
 }
 
 .scouts {
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   font-size: 23px;
   font-style: normal;
   padding: 20px;
   color: #ffffff;
+}
+
+.game-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin: 30px auto;
+  padding: 0 30px;
+}
+
+.map-section {
+  flex-shrink: 0;
+}
+
+/* Compact control panel */
+.control-section .clue {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 8px 0;
+  margin: 0 0 20px;
+  font-size: 30px;
+  font-weight: 800;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.control-section > div:has(.button) {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.control-section .button {
+  margin-top: 40px;
+}
+
+.control-section .sliders {
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  width: 100%;
+}
+
+.control-section .sliders label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.control-section .sliders input {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.control-section .results {
+  text-align: center;
+  width: 100%;
+}
+
+.control-section .results h2 {
+  text-align: center;
+}
+
+.control-section .results p {
+  margin: 10px 0;
+}
+
+.control-section > p {
+  margin: 0;
+}
+@media (max-width: 950px) {
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
 }

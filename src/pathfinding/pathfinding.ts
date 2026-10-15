@@ -1,6 +1,22 @@
 import type { Cell, Position } from "../types/types";
 import { canMoveTo } from "../movement/movement";
 
+// Movement cost for each terrain type
+function getMovementCost(terrain: Cell["terrain"]): number {
+  switch (terrain) {
+    case "field":
+      return 1;
+    case "park":
+      return 2;
+    case "urban":
+      return 2;
+    case "forest":
+      return 3;
+    case "water":
+      return Infinity;
+  }
+}
+
 const key = (p: Position) => `${p.x},${p.y}`;
 
 // Manhattan-avstånd, passar när man bara går upp/ner/vänster/höger
@@ -19,7 +35,9 @@ export function findPath(
   const open: Position[] = [start];
   const cameFrom = new Map<string, Position>();
   const gScore = new Map<string, number>([[key(start), 0]]);
-  const fScore = new Map<string, number>([[key(start), heuristic(start, goal)]]);
+  const fScore = new Map<string, number>([
+    [key(start), heuristic(start, goal)],
+  ]);
 
   while (open.length > 0) {
     // Ta noden med lägst fScore
@@ -46,7 +64,12 @@ export function findPath(
     for (const n of neighbors) {
       if (!canMoveTo(n.x, n.y, cells)) continue; // undviker vatten
 
-      const tentative = gScore.get(key(current))! + 1;
+      const nextCell = cells.find((cell) => cell.x === n.x && cell.y === n.y);
+
+      if (!nextCell) continue;
+
+      const tentative =
+        gScore.get(key(current))! + getMovementCost(nextCell.terrain);
       if (tentative < (gScore.get(key(n)) ?? Infinity)) {
         cameFrom.set(key(n), current);
         gScore.set(key(n), tentative);
