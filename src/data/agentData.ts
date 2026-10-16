@@ -10,11 +10,24 @@ export function createAgents(scoutCount: number, clueCount: number): Agent[] {
     ...Array<AgentRole>(scoutCount).fill("scout"),
   ];
 
+  const startPositions = [
+    { x: 0, y: 9 },
+    { x: 0, y: 10 },
+    { x: 0, y: 8 },
+    { x: 0, y: 11 },
+    { x: 0, y: 7 },
+    { x: 0, y: 12 },
+    { x: 0, y: 6 },
+    { x: 0, y: 13 },
+    { x: 0, y: 5 },
+    { x: 0, y: 14 },
+  ];
+
   return roles.map(
     (role, i): Agent => ({
       id: i + 1,
-      x: 0,
-      y: i * 2, // spridda längs vänstra kanten
+      x: startPositions[i].x,
+      y: startPositions[i].y,
       path: [],
       role,
     }),

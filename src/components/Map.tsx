@@ -6,8 +6,15 @@ type MapProps = {
   target: Target;
   agents: AgentType[];
   showProbabilities: boolean;
+  showTarget: boolean;
 };
-function Map({ cells, target, agents, showProbabilities }: MapProps) {
+function Map({
+  cells,
+  target,
+  agents,
+  showProbabilities,
+  showTarget,
+}: MapProps) {
   return (
     <div className="map">
       {/* Loops through every cell in the array */}
@@ -33,7 +40,10 @@ function Map({ cells, target, agents, showProbabilities }: MapProps) {
               </span>
             )}
             {/* Shows a red X if the target is in this cell */}
-            {hasTarget && <span className="target">×</span>}
+            {showTarget && target.x === cell.x && target.y === cell.y && (
+              <span className="target">×</span>
+            )}
+            {/* Shows the agent in this cell */}
             {agent && <Agent agent={agent} />}
           </div>
         );

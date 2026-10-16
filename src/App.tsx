@@ -43,6 +43,7 @@ function App() {
 
   const [clueUsed, setClueUsed] = useState(false);
   const [showProbabilities, setShowProbabilities] = useState(false);
+  const [showTarget, setShowTarget] = useState(false);
 
   // Agent controls
   const [scoutCount, setScoutCount] = useState(2);
@@ -185,6 +186,7 @@ function App() {
             target={target}
             agents={agents}
             showProbabilities={showProbabilities}
+            showTarget={showTarget}
           />
         </div>
         <div className="control-section">
@@ -215,6 +217,13 @@ function App() {
               onClick={() => setShowProbabilities((show) => !show)}
             >
               {showProbabilities ? "Hide probabilities" : "Show probabilities"}
+            </button>
+
+            <button
+              className="button"
+              onClick={() => setShowTarget((show) => !show)}
+            >
+              {showTarget ? "Hide target" : "Show target"}
             </button>
           </div>
 
