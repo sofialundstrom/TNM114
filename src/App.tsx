@@ -8,6 +8,7 @@ import { findPath } from "./pathfinding/pathfinding";
 import { createClue, getClueText } from "./data/clueData";
 import { assignDestinations } from "./swarm/swarm";
 import { createAgents, MAX_PER_TYPE } from "./data/agentData";
+import Legend from "./components/legend";
 
 import {
   initializeProbabilities,
@@ -276,6 +277,7 @@ function App() {
         {/* control-section */}
       </div>{" "}
       {/* game-layout */}
+      <Legend />
     </div>
   );
 }
